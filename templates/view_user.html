@@ -1,0 +1,58 @@
+{% extends "main_layout.html" %}
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">User Management</h2>
+                <h5 class="text-white op-7 mb-2">Pengelolaan user dari data Dosen dan Mahasiswa</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Multi Filter Select</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="multi-filter-select" class="display table table-striped table-hover" >
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No. Induk</th>
+                            <th>Nama</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No. Induk</th>
+                            <th>Nama</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for result in data: %}
+                            <tr>
+                                <td>1</td>
+                                <td>{{ result["no_induk"] }}</td>
+                                <td>{{ result["nama"] }}</td>
+                                <td>{{ result["role"] }}</td>
+                                <td>Edit | Delete</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

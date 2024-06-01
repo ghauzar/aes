@@ -1,0 +1,59 @@
+{% extends "main_layout.html" %}
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+  <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+          <div>
+              <h2 class="text-white pb-2 fw-bold">Dashboard</h2>
+              <h5 class="text-white op-7 mb-2">Selamat datang</h5>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="card">
+  <!-- <div class="card-header">
+    <div class="form-group">
+      <div class="card-title">Form Elements</div>
+    </div>
+  </div> -->
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6 col-lg-4">
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="file_essay">Upload file jawaban essay (format: .csv)</label>
+          <input type="file" name="file" class="form-control-file" id="file_essay" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+          <label for=""></label>
+        </div>
+        <div class="form-group">
+          <label for="defaultSelect">Kuis ke-</label>
+          <select name="id_kuis" class="form-control form-control" id="defaultSelect">
+            {% for k in kuis: %}
+                <option value='{{ k["id_kuis"] }}'>{{ k["kuis_ke"]}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group form-inline">
+          <label for="inlineinput">Nama Kolom Jawaban Essay</label>
+          <div class="col-md-10 p-0">
+            <textarea type="text" name="kolom_jawaban_essay" class="form-control input-full" id="inlineinput"></textarea>
+          </div>
+          <small id="emailHelp2" class="form-text text-muted">Pisahkan nama kolom dengan spasi</small>
+        </div>
+        <div class="form-group form-inline">
+          <label for="inputname">Nama Kolom Identitas</label>
+          <div class="col-md-10 p-0">
+            <textarea type="text" name="kolom_identitas" class="form-control input-full" id="inputname" placeholder="misal: nim nama"></textarea>
+          </div>
+          <small id="emailHelp3" class="form-text text-muted">Pisahkan nama kolom dengan spasi</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-action">
+    <button class="btn btn-success">Submit</button>
+    <button class="btn btn-danger">Cancel</button>
+  </div>
+</div>
+{% endblock %}
