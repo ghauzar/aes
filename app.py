@@ -1,10 +1,8 @@
 from flask import Flask, flash, render_template, url_for, request, redirect, session
 from werkzeug.utils import secure_filename
-import os
 import pandas as pd
 import pymysql.cursors
 import requests
-import numpy as np
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "mySecrecy" #session butuh secret key
 app.jinja_env.filters["zip"] = zip
@@ -63,22 +61,19 @@ def logout():
         session.pop("nama")
         session.pop("role")
     return redirect(url_for('login'))
-
-
 # End of KONFIGURASI LOGIN
 
 # UPLOAD FILE CSV
-
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == 'POST':
-        API_URL = "https://api-inference.huggingface.co/models/cassador/indobert-embedding-2epoch"
-        headers = {"Authorization": "Bearer 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"}
+        API_URL = "https://api-inference.huggingface.co/models/cassador/indobert-base-p2-nli-v2"
+        headers = {"Authorization": "Bearer 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"}
+
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
             return response.json()
@@ -114,12 +109,13 @@ def upload_file():
             output_all[i+1] = score
         identitas.update(output_all)
         hasil_scoring = pd.DataFrame(identitas)
-        hasil_scoring.to_excel('hasil_scoring.xlsx')
-        return "Hasil scoring berhasil didownload"
+        hasil_scoring.to_excel('05juni.xlsx')
+        return render_template("scoring_result.html")
     
 # End of UPLOAD FILE CSV
 
 # USER MANAGEMENT
+# View user
 @app.route("/user", methods=["GET", "POST"])
 def view_user():
     if session["role"] == '1':
@@ -130,7 +126,63 @@ def view_user():
         return render_template("view_user.html", data=result)
     else:
         return redirect(url_for("dashboard"))
-    
+
+# Create user
+@app.route("/create_user", methods=["GET", "POST"])
+def create_user():
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            #ambil data
+            nik = request.form["nik"]
+            nama = request.form["nama"]
+            role = request.form["role"]
+            password = request.form["password"]
+            # Create a new record
+            sql = "INSERT INTO `user` (`no_induk`, `nama`, `password`, `role`) VALUES (%s, %s, %s, %s)"
+            data = nik, nama, password, role
+            cursor.execute(sql, data)
+
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_user'))
+
+# Update user
+@app.route("/update_user", methods=["GET", "POST"])
+def update_user():
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            #ambil data
+            id_user = request.form["id_user"]
+            nik = request.form["nik"]
+            nama = request.form["nama"]
+            role = request.form["role"]
+            # Update a record
+            sql = "UPDATE `user` SET no_induk=%s, nama=%s, role=%s WHERE id_user=%s"
+            data = nik, nama, role, id_user
+            cursor.execute(sql, data)
+            
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_user'))
+
+# Delete
+@app.route("/delete_user", methods=["POST"])
+def delete_user():
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            id_user = request.form["id_user"]
+        
+            # Delete record
+            sql = "DELETE FROM `user` WHERE id_user=%s"
+            cursor.execute(sql, id_user)
+
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_user'))
 # End of USER MANAGEMENT
 
 

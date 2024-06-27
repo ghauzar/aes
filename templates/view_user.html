@@ -5,7 +5,7 @@
         <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
             <div>
                 <h2 class="text-white pb-2 fw-bold">User Management</h2>
-                <h5 class="text-white op-7 mb-2">Pengelolaan user dari data Dosen dan Mahasiswa</h5>
+                <h5 class="text-white op-7 mb-2">Pengelolaan user</h5>
             </div>
         </div>
     </div>
@@ -14,7 +14,7 @@
 <div class="col-md-12">
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title">Multi Filter Select</h4>
+            <button type="button" class="btn btn-lg btn-success" data-toggle="modal" data-target="#tambahModal">Tambah data</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -44,7 +44,14 @@
                                 <td>{{ result["no_induk"] }}</td>
                                 <td>{{ result["nama"] }}</td>
                                 <td>{{ result["role"] }}</td>
-                                <td>Edit | Delete</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ result['no_induk'] }}"> 
+                                        Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ result['no_induk'] }}"> 
+                                        Delete
+                                    </button>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -54,5 +61,107 @@
     </div>
 </div>
 
+<!-- Modal Tambah -->
+<div class="modal fade" id="tambahModal" tabindex="-1" role="dialog" aria-labelledby="tambahModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="tambahModalLabel">Tambah Data User</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form action="{{ url_for('create_user') }}" method="post">
+                    <div class="form-group">
+                        <label for="nik">No. Induk Kepegawaian</label>
+                        <input type="text" class="form-control" id="nik" name="nik" placeholder="NIK"> <br>
+                        <label for="nama">Nama</label>
+                        <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Lengkap"> <br>
+                        <label for="passwd">Password</label>
+                        <input type="password" class="form-control" id="passwd" name="password"> <br>
+                        <label class="mt-3 mb-3"><b>Role</b></label>
+                        <div class="form-group form-group-default">
+                            <select class="form-control" id="formRole" name="role">
+                                <option value="1">Administrator</option>
+                                <option value="2">Dosen</option>
+                            </select>
+                        </div>
+                    </div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-success">Tambahkan</button>
+            </form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Modal Tambah -->
+ 
+<!-- Modal Edit -->
+{% for result in data: %}
+<div class="modal fade" id="editModal{{ result['no_induk'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editModalLabel">Edit Data User</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form action="{{ url_for('update_user') }}" method="post">
+                    <div class="form-group">
+                        <input type="hidden" name="id_user" value="{{ result['id_user'] }}">
+                        <label for="nik">No. Induk Kepegawaian</label>
+                        <input type="text" class="form-control" id="nik" name="nik" placeholder="NIK" value="{{ result['no_induk'] }}"> <br>
+                        <label for="nama">Nama</label>
+                        <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Lengkap" value="{{ result['nama'] }}"> <br>
+                        <label class="mt-3 mb-3"><b>Role</b></label>
+                        <div class="form-group form-group-default">
+                            <select class="form-control" id="formRole" name="role">
+                                <option {% if result['role'] == 1: %} {{ selected }} value="1">Administrator</option>
+                                <option {% elif result['role'] == 2: %} {{ selected }} {% endif %} value="2">Dosen</option>
+                            </select>
+                        </div>
+                    </div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Simpan</button>
+            </form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+<!-- End Modal Edit -->
 
+<!-- Modal Delete -->
+{% for result in data: %}
+<div class="modal fade" id="deleteModal{{result['no_induk']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">Hapus Data User</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+                <p>Anda yakin ingin menghapus data <b>{{ result['nama'] }}</b>?</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Tutup</button>
+                <form action="{{url_for('delete_user')}}" method="post">
+                    <input type="hidden" name="id_user" value="{{ result['id_user'] }}">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+<!-- End Modal Delete -->
 {% endblock %}
