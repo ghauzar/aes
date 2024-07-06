@@ -1,0 +1,181 @@
+{% extends "main_layout.html" %}
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Mata Kuliah</h2>
+                <h5 class="text-white op-7 mb-2">Pengelolaan mata kuliah</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <button type="button" class="btn btn-lg btn-success" data-toggle="modal" data-target="#tambahModal">Tambah data</button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="multi-filter-select" class="display table table-striped table-hover" >
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kode</th>
+                            <th>Mata Kuliah</th>
+                            <th>Tahun Ajaran</th>
+                            <th>Pengampu</th>
+                            <th>NIK</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>Kode</th>
+                            <th>Mata Kuliah</th>
+                            <th>Tahun Ajaran</th>
+                            <th>Pengampu</th>
+                            <th>NIK</th>
+                            <th>Action</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for result in data: %}
+                            <tr>
+                                <td>1</td>
+                                <td>{{ result["kode"] }}</td>
+                                <td>{{ result["matkul"] }}</td>
+                                <td>{{ result["tahun_ajaran"] }}</td>
+                                <td>{{ result["pengampu"] }}</td>
+                                <td>{{ result["nik"] }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ result['id_matkul'] }}"> 
+                                        Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ result['id_matkul'] }}"> 
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah -->
+<div class="modal fade" id="tambahModal" tabindex="-1" role="dialog" aria-labelledby="tambahModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editModalLabel">Tambah Data Mata Kuliah</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form action="{{ url_for('create_mata_kuliah') }}" method="post">
+                    <div class="form-group">
+                        <label for="kode">Kode Mata Kuliah</label>
+                        <input type="text" class="form-control" id="kode" name="kode_matkul" placeholder="Kode Matkul"> <br>
+                        <label for="matkul">Mata Kuliah</label>
+                        <input type="text" class="form-control" id="matkul" name="matkul" placeholder="Nama Mata Kuliah"> <br>
+                        <label for="tahun_ajaran">Tahun Ajaran</label>
+                        <input type="text" class="form-control" id="tahun_ajaran" name="tahun_ajaran" placeholder="contoh: 2023/2024"> <br>
+                        <label class="mt-3 mb-3"><b>Pengampu</b></label>
+                        <div class="form-group form-group-default">
+                            <select class="form-control" id="formRole" name="id_dosen">
+                                {% for dosen in data_pengampu: %}
+                                    <option value="{{dosen['id_user']}}">{{ dosen['nama'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Simpan</button>
+            </form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Modal Tambah -->
+ 
+<!-- Modal Edit -->
+{% for result in data: %}
+<div class="modal fade" id="editModal{{ result['id_matkul'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editModalLabel">Edit Data Mata Kuliah</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form action="{{ url_for('update_mata_kuliah') }}" method="post">
+                    <div class="form-group">
+                        <input type="hidden" name="id_matkul" value="{{ result['id_matkul'] }}">
+                        <label for="kode">Kode Mata Kuliah</label>
+                        <input type="text" class="form-control" id="kode" name="kode_matkul" placeholder="Kode Matkul" value="{{ result['kode'] }}"> <br>
+                        <label for="matkul">Mata Kuliah</label>
+                        <input type="text" class="form-control" id="matkul" name="matkul" placeholder="Nama Mata Kuliah" value="{{ result['matkul'] }}"> <br>
+                        <label for="tahun_ajaran">Tahun Ajaran</label>
+                        <input type="text" class="form-control" id="tahun_ajaran" name="tahun_ajaran" placeholder="contoh: 2023/2024" value="{{ result['tahun_ajaran'] }}"> <br>
+                        <label class="mt-3 mb-3"><b>Pengampu</b></label>
+                        <div class="form-group form-group-default">
+                            <select class="form-control" id="formRole" name="id_dosen">
+                                {% for dosen in data_pengampu: %}
+                                    {% if dosen['nama'] == result['pengampu']: %}
+                                        <option value="{{dosen['id_user']}}" selected>{{ dosen['nama'] }}</option>
+                                    {% else: %}
+                                        <option value="{{dosen['id_user']}}">{{ dosen['nama'] }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Simpan</button>
+            </form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+<!-- End Modal Edit -->
+
+<!-- Modal Delete -->
+{% for result in data: %}
+<div class="modal fade" id="deleteModal{{result['id_matkul']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">Hapus Data Mata Kuliah</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+                <p>Anda yakin ingin menghapus mata kuliah <b>{{ result['matkul'] }}</b> yang diampu oleh <b>{{ result['pengampu'] }}</b>?</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Tutup</button>
+                <form action="{{url_for('delete_mata_kuliah')}}" method="post">
+                    <input type="hidden" name="id_matkul" value="{{ result['id_matkul'] }}">
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+<!-- End Modal Delete -->
+{% endblock %}

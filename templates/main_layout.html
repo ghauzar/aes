@@ -65,8 +65,8 @@
 										<div class="user-box">
 											<div class="avatar-lg"><img src="{{ url_for('static', filename='/assets/img/profile.jpg') }}" alt="image profile" class="avatar-img rounded"></div>
 											<div class="u-text">
-												<h4>Hizrian</h4>
-												<p class="text-muted">hello@example.com</p><a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+												<h4>{{ session["nama"] }}</h4>
+												<a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
 											</div>
 										</div>
 									</li>
@@ -142,7 +142,7 @@
 							</span>
 							<h4 class="text-section">Menu</h4>
 						</li>
-						<li class="nav-item active">
+						<li class="nav-item">
 							<a href="{{ url_for('dashboard') }}">
 								<i class="fas fa-home"></i>
 								<p>Dashboard</p>
@@ -157,15 +157,15 @@
 							</li>
 						{% endif %}
 						<li class="nav-item">
-							<a href="{{ url_for('dashboard')}}">
+							<a href="{{ url_for('view_mata_kuliah')}}">
 								<i class="fas fa-th-list"></i>
 								<p>Mata Kuliah</p>
 							</a>
 						</li>
 						<li class="nav-item">
-							<a data-toggle="collapse" href="#forms">
+							<a href="{{ url_for('view_kuis') }}">
 								<i class="fas fa-pen-square"></i>
-								<p>Forms</p>
+								<p>Kuis</p>
 							</a>
 						</li>
 						<li class="nav-item">
@@ -202,7 +202,36 @@
 	</div>
 <!-- Untuk navbar  -->
 <script>
-	document.addEventListener('DOMContentLoaded', 
+	document.addEventListener('DOMContentLoaded', function() {
+		const navItems = document.querySelectorAll('.nav-item');
+		
+		// Fungsi untuk menghapus kelas "active" dari semua elemen
+		const removeActiveClass = () => {
+			navItems.forEach(navItem => navItem.classList.remove('active'));
+		};
+	
+		// Fungsi untuk memberikan kelas "active" pada elemen berdasarkan indeks yang disimpan di local storage
+		const setActiveClassFromLocalStorage = () => {
+			const activeIndex = localStorage.getItem('activeNavItemIndex');
+			if (activeIndex !== null) {
+				navItems[activeIndex].classList.add('active');
+			}
+		};
+	
+		// Menambahkan event listener untuk menyimpan indeks dan mengatur kelas "active" saat elemen diklik
+		navItems.forEach((item, index) => {
+			item.addEventListener('click', function() {
+				removeActiveClass();
+				this.classList.add('active');
+				localStorage.setItem('activeNavItemIndex', index);
+			});
+		});
+	
+		// Mengatur kelas "active" pada elemen yang sesuai saat halaman dimuat
+		setActiveClassFromLocalStorage();
+	});
+	
+	/*document.addEventListener('DOMContentLoaded', 
 		function(){
 			const navItems = document.querySelectorAll('.nav-item');
 			navItems.forEach(item => {
@@ -212,7 +241,7 @@
 						this.classList.add('active');
 					});
 			});	
-		});
+		});*/
 </script>
 	<!--   Core JS Files   -->
 <script src="{{ url_for('static', filename='/assets/js/core/jquery.3.2.1.min.js') }}"></script>

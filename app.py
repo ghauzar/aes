@@ -1,8 +1,9 @@
 from flask import Flask, flash, render_template, url_for, request, redirect, session
-from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 import pymysql.cursors
 import requests
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "mySecrecy" #session butuh secret key
 app.jinja_env.filters["zip"] = zip
@@ -19,6 +20,7 @@ connection = pymysql.connect(host='localhost',
                              cursorclass=pymysql.cursors.DictCursor)
 
 # KONFIGURASI LOGIN
+
 @app.route("/", methods=["GET","POST"])
 def login():
     if "no_induk" in session:
@@ -33,10 +35,11 @@ def login():
                 cursor.execute(sql, username)
                 result = cursor.fetchone()  
                 # Auth
-                if username == result['no_induk'] and password == result['password']:
+                if username == result['no_induk'] and check_password_hash(result["password"], password):
                     session["no_induk"] = result['no_induk']
                     session["nama"]     = result['nama']
                     session["role"]     = str(result['role']) 
+                    session["logged"]   = True
                     return redirect(url_for("dashboard"))
                 else:
                     flash('Username atau password tidak tepat.', 'error')
@@ -71,8 +74,8 @@ def allowed_file(filename):
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == 'POST':
-        API_URL = "https://api-inference.huggingface.co/models/cassador/indobert-base-p2-nli-v2"
-        headers = {"Authorization": "Bearer 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"}
+        API_URL = "https://api-inference.huggingface.co/models/cassador/4bs4lr2"
+        headers = {"Authorization": "Bearer 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"}
 
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
@@ -109,7 +112,7 @@ def upload_file():
             output_all[i+1] = score
         identitas.update(output_all)
         hasil_scoring = pd.DataFrame(identitas)
-        hasil_scoring.to_excel('05juni.xlsx')
+        hasil_scoring.to_excel('6juli.xlsx')
         return render_template("scoring_result.html")
     
 # End of UPLOAD FILE CSV
@@ -118,14 +121,17 @@ def upload_file():
 # View user
 @app.route("/user", methods=["GET", "POST"])
 def view_user():
-    if session["role"] == '1':
-        with connection.cursor() as cursor:
-                sql = "SELECT * FROM user"
-                cursor.execute(sql)
-                result = cursor.fetchall()
-        return render_template("view_user.html", data=result)
+    if "role" in session:
+        if session["role"] == '1':
+            with connection.cursor() as cursor:
+                    sql = "SELECT * FROM user"
+                    cursor.execute(sql)
+                    result = cursor.fetchall()
+            return render_template("view_user.html", data=result)
+        else:
+            return redirect(url_for("dashboard"))
     else:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("login"))
 
 # Create user
 @app.route("/create_user", methods=["GET", "POST"])
@@ -137,9 +143,10 @@ def create_user():
             nama = request.form["nama"]
             role = request.form["role"]
             password = request.form["password"]
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
             # Create a new record
             sql = "INSERT INTO `user` (`no_induk`, `nama`, `password`, `role`) VALUES (%s, %s, %s, %s)"
-            data = nik, nama, password, role
+            data = nik, nama, hashed_password, role
             cursor.execute(sql, data)
 
             # connection is not autocommit by default. So you must commit to save
@@ -173,8 +180,9 @@ def delete_user():
     if request.method == 'POST':
         with connection.cursor() as cursor:
             id_user = request.form["id_user"]
-        
             # Delete record
+            sql2 = "DELETE FROM matkul WHERE id_dosen=%s"
+            cursor.execute(sql2, id_user)
             sql = "DELETE FROM `user` WHERE id_user=%s"
             cursor.execute(sql, id_user)
 
@@ -185,5 +193,120 @@ def delete_user():
         return redirect(url_for('view_user'))
 # End of USER MANAGEMENT
 
-
 # MATA KULIAH MANAGEMENT
+# View Mata Kuliah
+@app.route("/mata_kuliah", methods=["GET", "POST"])
+def view_mata_kuliah():
+    if "role" in session:
+        with connection.cursor() as cursor:
+            if session["role"] == '1':
+                sql = "SELECT matkul.id_matkul as id_matkul, matkul.kode_matkul as kode, matkul.nama_matkul as matkul, matkul.tahun_ajaran as tahun_ajaran, user.id_user as id_user, user.nama as pengampu, user.no_induk as nik FROM matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
+                sql2 = "SELECT id_user, nama FROM user"
+            else:
+                sql = f"SELECT matkul.id_matkul as id_matkul, matkul.kode_matkul as kode, matkul.nama_matkul as matkul, matkul.tahun_ajaran as tahun_ajaran, user.id_user as id_user, user.nama as pengampu, user.no_induk as nik FROM matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
+                sql2 = f"SELECT id_user, nama FROM user WHERE no_induk={session['no_induk']}"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            cursor.execute(sql2)
+            result2 = cursor.fetchall()
+        return render_template("view_matkul.html", data_pengampu=result2, data=result, data_dosen=result)
+    else:
+        return redirect(url_for('login'))
+
+# Create Mata Kuliah
+@app.route("/create_mata_kuliah", methods=["GET", "POST"])
+def create_mata_kuliah():
+    if "role" in session:
+        if request.method == 'POST':
+            with connection.cursor() as cursor:
+                #ambil data
+                kode_matkul = request.form["kode_matkul"]
+                matkul = request.form["matkul"]
+                tahun_ajaran = request.form["tahun_ajaran"]
+                id_dosen = request.form["id_dosen"]
+                # Create a new record
+                sql = "INSERT INTO `matkul` (`kode_matkul`, `nama_matkul`, `tahun_ajaran`, `id_dosen`) VALUES (%s, %s, %s, %s)"
+                data = kode_matkul, matkul, tahun_ajaran, id_dosen
+                cursor.execute(sql, data)
+
+                # connection is not autocommit by default. So you must commit to save
+                # your changes.
+                connection.commit()
+                cursor.close()
+            return redirect(url_for('view_mata_kuliah'))
+    else:
+        return redirect(url_for('login'))
+
+# Update Mata Kuliah
+@app.route("/update_mata_kuliah", methods=["GET","POST"])
+def update_mata_kuliah():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+                #ambil data
+                id_matkul    = request.form["id_matkul"]
+                kode         = request.form["kode_matkul"]
+                matkul       = request.form["matkul"]
+                tahun_ajaran = request.form["tahun_ajaran"]
+                id_dosen     = request.form["id_dosen"]
+                # Update a record
+                sql = "UPDATE `matkul` SET kode_matkul= %s, nama_matkul=%s, tahun_ajaran=%s, id_dosen=%s WHERE id_matkul=%s"
+                data = kode, matkul, tahun_ajaran, id_dosen, id_matkul
+                cursor.execute(sql, data)
+                connection.commit()
+                cursor.close()
+        return redirect(url_for('view_mata_kuliah'))
+
+# Delete Mata Kuliah
+@app.route("/delete_mata_kuliah", methods=["POST"])
+def delete_mata_kuliah():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            id_matkul = request.form["id_matkul"]
+            # Delete record
+            sql = "DELETE FROM `matkul` WHERE id_matkul=%s"
+            cursor.execute(sql, id_matkul)
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_mata_kuliah'))
+# END OF MATA KULIAH MANAGEMENT
+
+# KUIS MANAGEMENT
+# View
+@app.route("/kuis", methods=["GET"])
+def view_kuis():
+    if "role" in session:
+        with connection.cursor() as cursor:
+            if session["role"] == '1':
+                sql = "SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as matkul, matkul.kode_matkul as kode, matkul.tahun_ajaran as tahun_ajaran, user.nama FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
+
+                sql2 = "SELECT matkul.id_matkul as id_matkul, matkul.nama_matkul as nama_matkul, user.nama as pengampu from matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
+            else:
+                sql = f"SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as matkul, matkul.kode_matkul as kode, matkul.tahun_ajaran as tahun_ajaran, user.nama FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
+
+                sql2 = f"SELECT matkul.id_matkul as id_matkul, matkul.nama_matkul as nama_matkul, user.nama as pengampu from matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            cursor.execute(sql2)
+            result2 = cursor.fetchall()
+        return render_template("view_kuis.html", data_pilih_matkul=result2, data_kuis=result)
+    else:
+        return redirect(url_for('login'))
+
+# Create
+@app.route("/create_kuis", methods=["POST"])
+def create_kuis():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            kuis_ke = request.form["kuis_ke"]
+            id_matkul = request.form["id_matkul"]
+            sql = "INSERT INTO `kuis` (`kuis_ke`, `id_matkul`) VALUES (%s, %s)"
+            data = kuis_ke, id_matkul
+            cursor.execute(sql, data)
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+            return redirect(url_for('view_kuis'))
+
