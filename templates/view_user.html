@@ -40,15 +40,15 @@
                     <tbody>
                         {% for result in data: %}
                             <tr>
-                                <td>1</td>
+                                <td>{{ loop.index }}</td>
                                 <td>{{ result["no_induk"] }}</td>
                                 <td>{{ result["nama"] }}</td>
                                 <td>{{ result["role"] }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ result['no_induk'] }}"> 
+                                    <button type="button" class="btn btn-xs btn-round btn-primary" data-toggle="modal" data-target="#editModal{{ result['no_induk'] }}"> 
                                         Edit
                                     </button>
-                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ result['no_induk'] }}"> 
+                                    <button type="button" class="btn btn-xs btn-round btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ result['no_induk'] }}"> 
                                         Delete
                                     </button>
                                 </td>

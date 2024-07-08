@@ -43,19 +43,19 @@
                     </tfoot>
                     <tbody>
                         {% for result in data_kuis: %}
-                            
+                        <a href="{{ url_for('view_soal') }}"></a>
                             <tr>
-                                <td>{{ 1 }}</td>
+                                <td>{{ loop.index }}</td>
                                 <td>{{ result["kuis_ke"] }}</td>
                                 <td>{{ result["matkul"] }}</td>
                                 <td>{{ result["kode"] }}</td>
                                 <td>{{ result["tahun_ajaran"] }}</td>
-                                <td>{{ result["nama"] }}</td>
+                                <td>{{ result["pengampu"] }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ result['id_kuis'] }}"> 
+                                    <button type="button" class="btn btn-xs btn-round btn-primary" data-toggle="modal" data-target="#editModal{{ result['id_kuis'] }}"> 
                                         Edit
                                     </button>
-                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ result['id_kuis'] }}"> 
+                                    <button type="button" class="btn btn-xs btn-round btn-danger" data-toggle="modal" data-target="#deleteModal{{ result['id_kuis'] }}"> 
                                         Delete
                                     </button>
                                 </td>
@@ -82,7 +82,7 @@
 				<form action="{{ url_for('create_kuis') }}" method="post">
                     <div class="form-group">
                         <label for="kuis_ke">Kuis ke</label>
-                        <input type="text" class="form-control" id="kuis_ke" name="kuis_ke" placeholder="Kuis ke"> <br>
+                        <input type="text" class="form-control" id="kuis_ke" name="kuis_ke" placeholder="Kuis ke" value="{{ kuis_terakhir }}"> <br>
                         <label class="mt-3 mb-3" for="id_matkul"><b>Mata Kuliah</b></label>
                         <div class="form-group form-group-default">
                             <select class="form-control" id="id_matkul" name="id_matkul">
@@ -105,38 +105,35 @@
 <!-- End Modal Tambah -->
  
 <!-- Modal Edit -->
-{% for result in data: %}
-<div class="modal fade" id="editModal{{ result['id_matkul'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+{% for result in data_kuis: %}
+<div class="modal fade" id="editModal{{ result['id_kuis'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="editModalLabel">Edit Data Mata Kuliah</h5>
+				<h5 class="modal-title" id="editModalLabel">Edit Kuis</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
-				<form action="{{ url_for('update_mata_kuliah') }}" method="post">
+				<form action="{{ url_for('update_kuis') }}" method="post">
                     <div class="form-group">
-                        <input type="hidden" name="id_matkul" value="{{ result['id_matkul'] }}">
-                        <label for="kode">Kode Mata Kuliah</label>
-                        <input type="text" class="form-control" id="kode" name="kode_matkul" placeholder="Kode Matkul" value="{{ result['kode'] }}"> <br>
-                        <label for="matkul">Mata Kuliah</label>
-                        <input type="text" class="form-control" id="matkul" name="matkul" placeholder="Nama Mata Kuliah" value="{{ result['matkul'] }}"> <br>
-                        <label for="tahun_ajaran">Tahun Ajaran</label>
-                        <input type="text" class="form-control" id="tahun_ajaran" name="tahun_ajaran" placeholder="contoh: 2023/2024" value="{{ result['tahun_ajaran'] }}"> <br>
-                        <label class="mt-3 mb-3"><b>Pengampu</b></label>
+                        <input type="hidden" name="id_kuis" value="{{ result['id_kuis'] }}">
+                        <label for="kuis_ke">Kuis ke</label>
+                        <input type="text" class="form-control" id="kuis_ke" name="kuis_ke" placeholder="Kuis ke" value="{{ result['kuis_ke'] }}"> <br>
+                        <label for="id_matkul">Mata Kuliah</label>
                         <div class="form-group form-group-default">
-                            <select class="form-control" id="formRole" name="id_dosen">
-                                {% for dosen in data_pengampu: %}
-                                    {% if dosen['nama'] == result['pengampu']: %}
-                                        <option value="{{dosen['id_user']}}" selected>{{ dosen['nama'] }}</option>
+                            <select class="form-control" id="id_matkul" name="id_matkul">
+                                {% for matakuliah in data_pilih_matkul: %}
+                                    {% if result["id_matkul"] == matakuliah["id_matkul"]: %}
+                                    <option value="{{matakuliah['id_matkul']}}" selected>{{ matakuliah['nama_matkul']}} - {{matakuliah['pengampu'] }}</option>
                                     {% else: %}
-                                        <option value="{{dosen['id_user']}}">{{ dosen['nama'] }}</option>
+                                    <option value="{{matakuliah['id_matkul']}}">{{ matakuliah['nama_matkul']}} - {{matakuliah['pengampu'] }}</option>
                                     {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
+                        <p>Jika pilihan mata kuliah tidak muncul, maka silakan membuat mata kuliah terlebih dahulu</p> <br>
                     </div>
 			</div>
 			<div class="modal-footer">
@@ -151,23 +148,23 @@
 <!-- End Modal Edit -->
 
 <!-- Modal Delete -->
-{% for result in data: %}
-<div class="modal fade" id="deleteModal{{result['id_matkul']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+{% for result in data_kuis: %}
+<div class="modal fade" id="deleteModal{{result['id_kuis']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="deleteModalLabel">Hapus Data Mata Kuliah</h5>
+				<h5 class="modal-title" id="deleteModalLabel">Hapus Kuis</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
-                <p>Anda yakin ingin menghapus mata kuliah <b>{{ result['matkul'] }}</b> yang diampu oleh <b>{{ result['pengampu'] }}</b>?</p>
+                <p>Anda yakin ingin menghapus kuis ke-<b>{{ result['kuis_ke'] }}</b> dengan mata kuliah <b>{{ result["matkul"] }}</b> yang diampu oleh <b>{{ result['pengampu'] }}</b>?</p>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn" style="background: #dfdfdf; color: #181818" data-dismiss="modal">Tutup</button>
-                <form action="{{url_for('delete_mata_kuliah')}}" method="post">
-                    <input type="hidden" name="id_matkul" value="{{ result['id_matkul'] }}">
+                <form action="{{url_for('delete_kuis')}}" method="post">
+                    <input type="hidden" name="id_kuis" value="{{ result['id_kuis'] }}">
                     <button type="submit" class="btn btn-danger">Hapus</button>
                 </form>
 			</div>

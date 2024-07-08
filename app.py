@@ -20,7 +20,6 @@ connection = pymysql.connect(host='localhost',
                              cursorclass=pymysql.cursors.DictCursor)
 
 # KONFIGURASI LOGIN
-
 @app.route("/", methods=["GET","POST"])
 def login():
     if "no_induk" in session:
@@ -50,7 +49,10 @@ def login():
 def dashboard():
     if "role" in session:
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM kuis"
+            if session["role"] == "1":
+                sql = f"SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as nama_matkul, user.nama as pengampu FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
+            else:
+                sql = f"SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as nama_matkul, user.nama as pengampu FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
             cursor.execute(sql)
             kuis_list = cursor.fetchall()
         return render_template("index.html", kuis=kuis_list)
@@ -71,6 +73,7 @@ ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == 'POST':
@@ -85,7 +88,7 @@ def upload_file():
             file = request.files['file']
         df = pd.read_csv(file, sep=";")
         df.fillna("", inplace=True)
-        id_kuis = request.form["id_kuis"]
+        id_kuis             = request.form["id_kuis"]
         kolom_jawaban_essay = request.form["kolom_jawaban_essay"].split()
         kolom_identitas     = request.form["kolom_identitas"].split()
         jawaban     = df[kolom_jawaban_essay].to_dict(orient='list')
@@ -108,13 +111,13 @@ def upload_file():
                     "sentences": jawaban_per_soal
                 },
             })
+
             score = [round(score*jawaban_kunci[i]["bobot_nilai"]) for score in output]
             output_all[i+1] = score
         identitas.update(output_all)
         hasil_scoring = pd.DataFrame(identitas)
         hasil_scoring.to_excel('6juli.xlsx')
         return render_template("scoring_result.html")
-    
 # End of UPLOAD FILE CSV
 
 # USER MANAGEMENT
@@ -174,7 +177,7 @@ def update_user():
             cursor.close()
         return redirect(url_for('view_user'))
 
-# Delete
+# Delete user
 @app.route("/delete_user", methods=["POST"])
 def delete_user():
     if request.method == 'POST':
@@ -279,11 +282,11 @@ def view_kuis():
     if "role" in session:
         with connection.cursor() as cursor:
             if session["role"] == '1':
-                sql = "SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as matkul, matkul.kode_matkul as kode, matkul.tahun_ajaran as tahun_ajaran, user.nama FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
+                sql = "SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as matkul, matkul.kode_matkul as kode, matkul.id_matkul as id_matkul,  matkul.tahun_ajaran as tahun_ajaran, user.nama as pengampu FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
 
                 sql2 = "SELECT matkul.id_matkul as id_matkul, matkul.nama_matkul as nama_matkul, user.nama as pengampu from matkul INNER JOIN user ON matkul.id_dosen=user.id_user"
             else:
-                sql = f"SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as matkul, matkul.kode_matkul as kode, matkul.tahun_ajaran as tahun_ajaran, user.nama FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
+                sql = f"SELECT kuis.id_kuis as id_kuis, kuis.kuis_ke as kuis_ke, matkul.nama_matkul as matkul, matkul.kode_matkul as kode, matkul.id_matkul as id_matkul, matkul.tahun_ajaran as tahun_ajaran, user.nama as pengampu FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
 
                 sql2 = f"SELECT matkul.id_matkul as id_matkul, matkul.nama_matkul as nama_matkul, user.nama as pengampu from matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE user.no_induk={session['no_induk']}"
             cursor.execute(sql)
@@ -294,7 +297,7 @@ def view_kuis():
     else:
         return redirect(url_for('login'))
 
-# Create
+# Create Kuis
 @app.route("/create_kuis", methods=["POST"])
 def create_kuis():
     if request.method == "POST":
@@ -310,3 +313,42 @@ def create_kuis():
             cursor.close()
             return redirect(url_for('view_kuis'))
 
+# Update Kuis
+@app.route("/update_kuis", methods=["GET", "POST"])
+def update_kuis():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            #ambil data
+            id_kuis = request.form["id_kuis"]
+            kuis_ke = request.form["kuis_ke"]
+            id_matkul = request.form["id_matkul"]
+            # Update a record
+            sql = "UPDATE `kuis` SET kuis_ke= %s, id_matkul=%s WHERE id_kuis=%s"
+            data = kuis_ke, id_matkul, id_kuis
+            cursor.execute(sql, data)
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_kuis'))
+
+# Delete Kuis
+@app.route("/delete_kuis", methods=["POST"])
+def delete_kuis():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            id_kuis = request.form["id_kuis"]
+            # Delete record
+            sql = "DELETE FROM `kuis` WHERE id_kuis=%s"
+            cursor.execute(sql, id_kuis)
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_kuis'))
+# END OF KUIS MANAGEMENT
+
+
+# SOAL DAN JAWABAN MANAGEMENT
+@app.route("/soal_dan_jawaban/<int:id_kuis>", methods=["GET", "POST"])
+def view_soal(id_kuis):
+    kuis_ke = id_kuis
+    return render_template('view_soal', kuis_ke=kuis_ke)

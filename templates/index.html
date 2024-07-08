@@ -30,7 +30,7 @@
           <label for="defaultSelect">Kuis ke-</label>
           <select name="id_kuis" class="form-control form-control" id="defaultSelect">
             {% for k in kuis: %}
-                <option value='{{ k["id_kuis"] }}'>{{ k["kuis_ke"]}}</option>
+                <option value='{{ k["id_kuis"] }}'>{{ k["kuis_ke"]}} - {{ k["nama_matkul"] }} ({{ k["pengampu"] }})</option>
             {% endfor %}
           </select>
         </div>

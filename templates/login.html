@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='/assets/img/umpo.png') }}" type="image/x-icon"/>
     <title>AES-UMPO | Login</title>
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='/assets/css/bootstrap.min.css') }}">
@@ -25,15 +26,54 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+        .footer{
+            border: none;
+            color:white;
+            background: none;
+            position: absolute;
+            text-align: center;
+            top: 80%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .header{
+            border: none;
+            color:white;
+            background: none;
+            position: absolute;
+            text-align: center;
+            top: 20%;
+            left: 50%;
+            font-size:20px;
+            transform: translate(-50%, -50%);
+        }
+        .logo{
+            position: absolute;
+            width:200px;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
         @media only screen and (max-width: 390px) {
             .centered{
                 width:300px;
                 transform: translate(-50%, -90%)
             }
+            .header{
+                top:10%;
+                font-size: 16px;
+            }
+            .footer{
+                top: 60%;
+            }
+
+
         }
     </style>
 </head>
 <body>
+    <img src="{{ url_for('static', filename='/assets/img/umpo_done.png') }}" alt="navbar brand" class="logo">
+    <h1 class="header">Automated Essay Scoring</h1>
     <div class="container-sm centered">
         <h2 style="text-align:center; margin-bottom:20px">Login</h2>
         {% with errors = get_flashed_messages(category_filter=["error"]) %}
@@ -49,16 +89,17 @@
         <form action="{{ url_for('login') }}" method="POST">
             <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" id="username" aria-describedby="usernameHelp" autofocus>
-            <div id="usernameHelp" class="form-text">Username adalah NIK (Dosen) atau NIM (Mahasiswa)</div>
+            <input type="text" name="username" class="form-control" id="username" aria-describedby="usernameHelp" autofocus required>
+            <div id="usernameHelp" class="form-text">Username adalah NIK</div>
             </div>
             <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" id="password">
+            <input type="password" name="password" class="form-control" id="password" required>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
+    <p class="footer">Copyright &copy; 2024. Teknik Informatika UMPO</p>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
