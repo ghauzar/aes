@@ -59,9 +59,9 @@ def dashboard():
     else:
         return redirect(url_for("login"))
 
-@app.route("/logout") # hapus session
+@app.route("/logout")
 def logout():
-    if "no_induk" and "nama" and "role" in session:
+    if "no_induk" and "nama" and "role" in session: # hapus session
         session.pop("no_induk")
         session.pop("nama")
         session.pop("role")
@@ -116,7 +116,7 @@ def upload_file():
             output_all[i+1] = score
         identitas.update(output_all)
         hasil_scoring = pd.DataFrame(identitas)
-        hasil_scoring.to_excel('6juli.xlsx')
+        hasil_scoring.to_excel(r"C:\Users\VGArt\Downloads\Hasil_Scroing.xlsx")
         return render_template("scoring_result.html")
 # End of UPLOAD FILE CSV
 
@@ -350,5 +350,70 @@ def delete_kuis():
 # SOAL DAN JAWABAN MANAGEMENT
 @app.route("/soal_dan_jawaban/<int:id_kuis>", methods=["GET", "POST"])
 def view_soal(id_kuis):
-    kuis_ke = id_kuis
-    return render_template('view_soal', kuis_ke=kuis_ke)
+    with connection.cursor() as cursor:
+        sql = "SELECT soal.*, kuis.id_kuis FROM soal INNER JOIN kuis ON soal.id_kuis=kuis.id_kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE kuis.id_kuis=%s"
+        sql2 = "SELECT kuis.kuis_ke, matkul.nama_matkul, user.nama FROM kuis INNER JOIN matkul ON kuis.id_matkul=matkul.id_matkul INNER JOIN user ON matkul.id_dosen=user.id_user WHERE id_kuis=%s"
+        if(cursor.execute(sql, id_kuis) > 0):
+            result = cursor.fetchall()
+            cursor.execute(sql2, id_kuis)
+            result2 = cursor.fetchone()
+        else:
+            cursor.execute(sql2, id_kuis)
+            result2 = cursor.fetchone()
+            return render_template('create_soal.html', data_kuis=result2, id_kuis=id_kuis)
+        cursor.close()
+        return render_template('view_soal.html', header=result2, data_soal=result, id_kuis=id_kuis)
+
+# Create Soal
+@app.route("/create_soal", methods=["POST"])
+def create_soal():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            id_kuis = request.form["id_kuis"]
+            soal    = request.form["soal"]
+            jawaban_kunci = request.form["jawaban_kunci"]
+            bobot_nilai = request.form["bobot_nilai"]
+            sql = "INSERT INTO `soal` (`soal`, `jawaban_kunci`, `bobot_nilai`, `id_kuis`) VALUES (%s, %s, %s, %s)"
+            data = soal, jawaban_kunci, bobot_nilai, id_kuis
+            cursor.execute(sql, data)
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+            return redirect(url_for('view_soal', id_kuis=id_kuis))
+
+# Update Soal
+@app.route("/update_soal", methods=["POST"])
+def update_soal():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            id_kuis = request.form["id_kuis"]
+            id_soal = request.form["id_soal"]
+            soal    = request.form["soal"]
+            jawaban_kunci = request.form["jawaban_kunci"]
+            bobot_nilai   = request.form["bobot_nilai"]
+            sql = "UPDATE `soal` SET soal= %s, jawaban_kunci=%s, bobot_nilai=%s WHERE id_soal=%s"
+            data = soal, jawaban_kunci, bobot_nilai, id_soal
+            cursor.execute(sql, data)
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_soal', id_kuis=id_kuis))
+
+# Delete soal
+@app.route("/delete_soal", methods=["POST"])
+def delete_soal():
+    if request.method == "POST":
+        with connection.cursor() as cursor:
+            id_kuis = request.form["id_kuis"]
+            id_soal = request.form["id_soal"]
+            # Delete record
+            sql = "DELETE FROM `soal` WHERE id_soal=%s"
+            cursor.execute(sql, id_soal)
+            # connection is not autocommit by default. So you must commit to save
+            # your changes.
+            connection.commit()
+            cursor.close()
+        return redirect(url_for('view_soal', id_kuis=id_kuis))
+# END OF KUIS MANAGEMENT

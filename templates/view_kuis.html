@@ -43,10 +43,12 @@
                     </tfoot>
                     <tbody>
                         {% for result in data_kuis: %}
-                        <a href="{{ url_for('view_soal') }}"></a>
+                        
                             <tr>
                                 <td>{{ loop.index }}</td>
-                                <td>{{ result["kuis_ke"] }}</td>
+                                <td>{{ result["kuis_ke"] }} - 
+                                    <a href="{{ url_for('view_soal', id_kuis=result['id_kuis']) }}">Soal</a>
+                                </td>
                                 <td>{{ result["matkul"] }}</td>
                                 <td>{{ result["kode"] }}</td>
                                 <td>{{ result["tahun_ajaran"] }}</td>
@@ -69,7 +71,7 @@
 </div>
 
 <!-- Modal Tambah -->
-<div class="modal fade" id="tambahModal" tabindex="-1" role="dialog" aria-labelledby="tambahModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="tambahModal" tabindex="-1" role="dialog" aria-labelledby="tambahModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -106,7 +108,7 @@
  
 <!-- Modal Edit -->
 {% for result in data_kuis: %}
-<div class="modal fade" id="editModal{{ result['id_kuis'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="editModal{{ result['id_kuis'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -149,7 +151,7 @@
 
 <!-- Modal Delete -->
 {% for result in data_kuis: %}
-<div class="modal fade" id="deleteModal{{result['id_kuis']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="deleteModal{{result['id_kuis']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">

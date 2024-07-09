@@ -19,16 +19,16 @@
   </div> -->
   <div class="card-body">
     <div class="row">
-      <div class="col-md-6 col-lg-4">
+      <!-- <div class="col-md-6 col-lg-4"> -->
         <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
         <div class="form-group">
           <label for="file_essay">Upload file jawaban essay (format: .csv)</label>
-          <input type="file" name="file" class="form-control-file" id="file_essay" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
-          <label for=""></label>
+          <input type="file" name="file" class="form-control-file" id="file_essay" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
         </div>
         <div class="form-group">
           <label for="defaultSelect">Kuis ke-</label>
-          <select name="id_kuis" class="form-control form-control" id="defaultSelect">
+          <input type="hidden" name="kuis_ke" value="">
+          <select name="id_kuis" class="form-control" id="defaultSelect">
             {% for k in kuis: %}
                 <option value='{{ k["id_kuis"] }}'>{{ k["kuis_ke"]}} - {{ k["nama_matkul"] }} ({{ k["pengampu"] }})</option>
             {% endfor %}
@@ -36,24 +36,26 @@
         </div>
         <div class="form-group form-inline">
           <label for="inlineinput">Nama Kolom Jawaban Essay</label>
+          <!-- <button type="button" class="btn btn-icon btn-round btn-primary btn-xs" style="margin-left:5px">
+            <i class="fa fa-info"></i>
+          </button> -->
           <div class="col-md-10 p-0">
-            <textarea type="text" name="kolom_jawaban_essay" class="form-control input-full" id="inlineinput"></textarea>
+            <textarea type="text" name="kolom_jawaban_essay" class="form-control input-full" id="inlineinput" required></textarea>
           </div>
           <small id="emailHelp2" class="form-text text-muted">Pisahkan nama kolom dengan spasi</small>
         </div>
         <div class="form-group form-inline">
           <label for="inputname">Nama Kolom Identitas</label>
           <div class="col-md-10 p-0">
-            <textarea type="text" name="kolom_identitas" class="form-control input-full" id="inputname" placeholder="misal: nim nama"></textarea>
+            <textarea type="text" name="kolom_identitas" class="form-control input-full" id="inputname" placeholder="misal: nim nama" required></textarea>
           </div>
           <small id="emailHelp3" class="form-text text-muted">Pisahkan nama kolom dengan spasi</small>
         </div>
-      </div>
+      <!-- </div> -->
     </div>
   </div>
   <div class="card-action">
     <button class="btn btn-success">Submit</button>
-    <button class="btn btn-danger">Cancel</button>
   </div>
 </div>
 {% endblock %}

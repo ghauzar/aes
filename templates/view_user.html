@@ -62,7 +62,7 @@
 </div>
 
 <!-- Modal Tambah -->
-<div class="modal fade" id="tambahModal" tabindex="-1" role="dialog" aria-labelledby="tambahModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="tambahModal" tabindex="-1" role="dialog" aria-labelledby="tambahModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -101,7 +101,7 @@
  
 <!-- Modal Edit -->
 {% for result in data: %}
-<div class="modal fade" id="editModal{{ result['no_induk'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="editModal{{ result['no_induk'] }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -140,7 +140,7 @@
 
 <!-- Modal Delete -->
 {% for result in data: %}
-<div class="modal fade" id="deleteModal{{result['no_induk']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="deleteModal{{result['no_induk']}}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">

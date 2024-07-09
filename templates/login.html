@@ -15,7 +15,7 @@
             padding:0;
             box-sizing: border-box;
         }
-        body{ display: flex; background: slategray; position: relative; height: 100%;}
+        body{ display: flex; background: #1572e8; position: relative; height: 100%;}
         .centered{
             border-radius: 5px;
             padding: 20px;
@@ -88,15 +88,15 @@
         {% endwith %}
         <form action="{{ url_for('login') }}" method="POST">
             <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
+            <label for="username" class="form-label"><b>Username</b></label>
             <input type="text" name="username" class="form-control" id="username" aria-describedby="usernameHelp" autofocus required>
             <div id="usernameHelp" class="form-text">Username adalah NIK</div>
             </div>
             <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
+            <label for="password" class="form-label"><b>Password</b></label>
             <input type="password" name="password" class="form-control" id="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Submit</button>
         </form>
     </div>
     <p class="footer">Copyright &copy; 2024. Teknik Informatika UMPO</p>

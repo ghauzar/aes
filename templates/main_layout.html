@@ -66,17 +66,17 @@
 											<div class="avatar-lg"><img src="{{ url_for('static', filename='/assets/img/profile.jpg') }}" alt="image profile" class="avatar-img rounded"></div>
 											<div class="u-text">
 												<h4>{{ session["nama"] }}</h4>
-												<a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+												<a href="{{ url_for('logout') }}" class="btn btn-xs btn-danger btn-sm">Logout</a>
 											</div>
 										</div>
 									</li>
 									<li>
-										<div class="dropdown-divider"></div>
+										<!-- <div class="dropdown-divider"></div>
 										<a class="dropdown-item" href="#">My Profile</a>
 										<div class="dropdown-divider"></div>
 										<a class="dropdown-item" href="#">Account Setting</a>
 										<div class="dropdown-divider"></div>
-										<a class="dropdown-item" href="#">Logout</a>
+										<a class="dropdown-item" href="#">Logout</a> -->
 									</li>
 								</div>
 							</ul>
@@ -113,7 +113,7 @@
 
 							<div class="collapse in" id="collapseExample">
 								<ul class="nav">
-									<li>
+									<!-- <li>
 										<a href="#profile">
 											<span class="link-collapse">My Profile</span>
 										</a>
@@ -127,7 +127,7 @@
 										<a href="#settings">
 											<span class="link-collapse">Settings</span>
 										</a>
-									</li>
+									</li> -->
 									<li>
 										<a href="{{ url_for('logout') }}" class="btn btn-danger btn-block">Logout</a> 
 									</li>
@@ -168,13 +168,13 @@
 								<p>Kuis</p>
 							</a>
 						</li>
-						<li class="nav-item">
+						<!-- <li class="nav-item">
 							<a href="widgets.html">
 								<i class="fas fa-desktop"></i>
 								<p>Soal dan Jawaban</p>
-								<!-- <span class="badge badge-success">4</span> -->
+								<span class="badge badge-success">4</span>
 							</a>
-						</li>
+						</li> -->
 					</ul>
 				</div>
 			</div>
