@@ -3,7 +3,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 import pymysql.cursors
 import requests
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "mySecrecy" #session butuh secret key
 app.jinja_env.filters["zip"] = zip
@@ -69,7 +68,7 @@ def logout():
 # End of KONFIGURASI LOGIN
 
 # UPLOAD FILE CSV
-ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
+ALLOWED_EXTENSIONS = {'csv'}
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -83,16 +82,25 @@ def upload_file():
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
             return response.json()
-        # check if the post request has the file part
+        # validasi file dan format file
         if request.files['file']:
-            file = request.files['file']
+            if allowed_file(request.files['file'].filename):
+                file = request.files['file']
+            else:
+                flash('File tidak didukung, silakan upload file dengan format .csv', 'danger')
+                return redirect(url_for("dashboard"))
+            
         df = pd.read_csv(file, sep=";")
         df.fillna("", inplace=True)
         id_kuis             = request.form["id_kuis"]
         kolom_jawaban_essay = request.form["kolom_jawaban_essay"].split()
         kolom_identitas     = request.form["kolom_identitas"].split()
-        jawaban     = df[kolom_jawaban_essay].to_dict(orient='list')
-        identitas   = df[kolom_identitas].to_dict(orient='list')
+        try:
+            jawaban = df[kolom_jawaban_essay].to_dict(orient='list')
+            identitas = df[kolom_identitas].to_dict(orient='list')
+        except KeyError as e:
+            flash(str(e), 'danger')
+            return redirect(url_for("dashboard")) 
         jawaban_list = []
         for value in jawaban.values():
             li = value
@@ -111,13 +119,17 @@ def upload_file():
                     "sentences": jawaban_per_soal
                 },
             })
-
-            score = [round(score*jawaban_kunci[i]["bobot_nilai"]) for score in output]
+            score = [round(max(0,score)*jawaban_kunci[i]["bobot_nilai"]) for score in output]
             output_all[i+1] = score
+        identitas.update(jawaban)
         identitas.update(output_all)
         hasil_scoring = pd.DataFrame(identitas)
-        hasil_scoring.to_excel(r"C:\Users\VGArt\Downloads\Hasil_Scroing.xlsx")
-        return render_template("scoring_result.html")
+        try:
+            hasil_scoring.to_excel(r"C:\Users\VGArt\Downloads\Hasil_Scoring.xlsx")
+            flash('Hasil penilaian telah didownload', 'success')
+        except:
+            flash('Hasil penilaian gagal didownload', 'danger')
+        return redirect(url_for("dashboard"))
 # End of UPLOAD FILE CSV
 
 # USER MANAGEMENT

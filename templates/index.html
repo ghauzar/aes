@@ -19,11 +19,22 @@
   </div> -->
   <div class="card-body">
     <div class="row">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div class="row">
       <!-- <div class="col-md-6 col-lg-4"> -->
         <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
         <div class="form-group">
           <label for="file_essay">Upload file jawaban essay (format: .csv)</label>
-          <input type="file" name="file" class="form-control-file" id="file_essay" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
+          <input type="file" name="file" class="form-control-file" id="file_essay" accept=".csv" required>
         </div>
         <div class="form-group">
           <label for="defaultSelect">Kuis ke-</label>
