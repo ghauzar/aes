@@ -77,7 +77,7 @@ def allowed_file(filename):
 def upload_file():
     if request.method == 'POST':
         API_URL = "https://api-inference.huggingface.co/models/cassador/4bs4lr2"
-        headers = {"Authorization": "Bearer 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"}
+        headers = {"Authorization": ""}
 
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
